@@ -1,42 +1,60 @@
 import React, { useEffect } from 'react';
-import { NativeModules } from 'react-native';
+import { NativeModules, AppState } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 
 import notifee, { EventType } from '@notifee/react-native';
-import { navigationRef, navigate } from './src/navigation/RootNavigation';
 
+import { navigationRef, navigate } from './src/navigation/RootNavigation';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AlarmProvider } from './src/context/AlarmContext';
 import NotificationService from './src/services/NotificationService';
 
 const App = () => {
 
-useEffect(() => {
-  NotificationService.requestPermission();
-  NotificationService.createChannel();
+  useEffect(() => {
 
-  const checkAlarmOpen = async () => {
-    const result = await NativeModules.AlarmStorage?.checkAlarm();
+    NotificationService.requestPermission();
+    NotificationService.createChannel();
 
-    if (result) {
-      setTimeout(() => {
-        navigate('AlarmScreen');
-      }, 500);
-    }
-  };
+    const checkAlarmOpen = async () => {
+      const result = await NativeModules.AlarmStorage?.checkAlarm();
 
-  setTimeout(() => {
+      if (result) {
+        setTimeout(() => {
+          navigate('AlarmScreen');
+        }, 500);
+      }
+    };
+
     checkAlarmOpen();
-  }, 500);
 
-  const unsubscribe = notifee.onForegroundEvent(({ type }) => {
-    if (type === EventType.PRESS) {
-      navigate('AlarmScreen');
-    }
-  });
+    const appStateSubscription = AppState.addEventListener(
+      'change',
+      async state => {
+        if (state === 'active') {
+          const result =
+            await NativeModules.AlarmStorage?.checkAlarm();
 
-  return unsubscribe;
-}, []);
+          if (result) {
+            navigate('AlarmScreen');
+          }
+        }
+      }
+    );
+
+    const notifeeSubscription =
+      notifee.onForegroundEvent(({ type }) => {
+        if (type === EventType.PRESS) {
+          navigate('AlarmScreen');
+        }
+      });
+
+    return () => {
+      appStateSubscription.remove();
+      notifeeSubscription();
+    };
+
+  }, []);
 
   return (
     <AlarmProvider>

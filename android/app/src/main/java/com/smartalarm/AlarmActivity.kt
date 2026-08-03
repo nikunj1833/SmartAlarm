@@ -4,12 +4,10 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import com.facebook.react.ReactActivity
-import com.facebook.react.ReactActivityDelegate
-import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
-import com.facebook.react.defaults.DefaultReactActivityDelegate
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 
-class AlarmActivity : ReactActivity() {
+class AlarmActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,17 +23,35 @@ class AlarmActivity : ReactActivity() {
             )
         }
 
-        intent.putExtra("openAlarmScreen", true)
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+        )
+
+        setContentView(R.layout.activity_alarm)
+
+
+        findViewById<Button>(R.id.btnStop).setOnClickListener {
+
+            val intent = Intent(this, AlarmService::class.java)
+            intent.action = "STOP_ALARM"
+            startService(intent)
+
+            finish()
+        }
+
+
+        findViewById<Button>(R.id.btnSnooze).setOnClickListener {
+
+            val intent = Intent(this, AlarmService::class.java)
+            intent.action = "STOP_ALARM"
+            startService(intent)
+
+            finish()
+        }
     }
 
 
-    override fun getMainComponentName(): String = "SmartAlarm"
-
-
-    override fun createReactActivityDelegate(): ReactActivityDelegate =
-        DefaultReactActivityDelegate(
-            this,
-            mainComponentName,
-            fabricEnabled
-        )
+    override fun onBackPressed() {
+        // alarm screen se back disable
+    }
 }

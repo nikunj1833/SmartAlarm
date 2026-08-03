@@ -32,38 +32,7 @@ class AlarmService : Service() {
         }
 
         // OPEN ALARM SCREEN
-        val alarmIntent = Intent(this, AlarmActivity::class.java).apply {
-            addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP
-            )
-        }
 
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            2001,
-            alarmIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // FOREGROUND NOTIFICATION
-        val notification: Notification =
-            NotificationCompat.Builder(this, "alarm-channel")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Smart Alarm")
-                .setContentText("Wake Up!")
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setOngoing(true)
-                .setFullScreenIntent(pendingIntent, true)
-                .setContentIntent(pendingIntent)
-                .build()
-
-        startForeground(1001, notification)
-
-        // SHOW ALARM SCREEN
-        startActivity(alarmIntent)
 
         // PLAY RINGTONE
         if (mediaPlayer == null) {

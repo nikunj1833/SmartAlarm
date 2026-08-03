@@ -12,7 +12,19 @@ class AlarmReceiver : BroadcastReceiver() {
         val prefs = context.getSharedPreferences("alarm", Context.MODE_PRIVATE)
         prefs.edit().putBoolean("isAlarmTriggered", true).apply()
 
-        // Start ringtone service
+        // Open React Native App
+        val activityIntent = Intent(context, MainActivity::class.java).apply {
+            addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
+            )
+            putExtra("openAlarmScreen", true)
+        }
+
+        context.startActivity(activityIntent)
+
+        // Start Alarm Service (Ringtone)
         val serviceIntent = Intent(context, AlarmService::class.java)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -20,16 +32,5 @@ class AlarmReceiver : BroadcastReceiver() {
         } else {
             context.startService(serviceIntent)
         }
-
-        // Open native alarm screen
-        val activityIntent = Intent(context, AlarmActivity::class.java).apply {
-            addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK or
-                Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_SINGLE_TOP
-            )
-        }
-
-        context.startActivity(activityIntent)
     }
 }

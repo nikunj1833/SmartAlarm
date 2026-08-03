@@ -32,13 +32,14 @@
             </intent-filter>
 
         </activity>
+        
 <activity
     android:name=".AlarmActivity"
     android:exported="true"
     android:showWhenLocked="true"
     android:turnScreenOn="true"
+    android:excludeFromRecents="true"
     android:launchMode="singleTask"
-    android:excludeFromRecents="false"
     android:theme="@style/AppTheme" />
 
         <service

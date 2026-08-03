@@ -14,19 +14,19 @@ class AlarmStorageModule(
         return "AlarmStorage"
     }
 
-  @ReactMethod
-fun checkAlarm(promise: Promise) {
+    @ReactMethod
+    fun checkAlarm(promise: Promise) {
 
-    val prefs = reactContext.getSharedPreferences(
-        "alarm",
-        Context.MODE_PRIVATE
-    )
+        val prefs =
+            reactContext.getSharedPreferences("alarm", Context.MODE_PRIVATE)
 
-    val isAlarmTriggered = prefs.getBoolean(
-        "isAlarmTriggered",
-        false
-    )
+        val isAlarmTriggered =
+            prefs.getBoolean("isAlarmTriggered", false)
 
-    promise.resolve(isAlarmTriggered)
-}
+        if (isAlarmTriggered) {
+            prefs.edit().putBoolean("isAlarmTriggered", false).apply()
+        }   
+
+        promise.resolve(isAlarmTriggered)
+    }
 }

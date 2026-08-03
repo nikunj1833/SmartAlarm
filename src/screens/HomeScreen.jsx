@@ -36,20 +36,18 @@ useEffect(() => {
 
 
       if (
-        sameHour &&
-        sameMinute &&
-        sameSecond &&
-        triggeredAlarm.current !== alarm.id
-      ) {
+  sameHour &&
+  sameMinute &&
+  sameSecond &&
+  triggeredAlarm.current !== alarm.id
+) {
+  triggeredAlarm.current = alarm.id;
 
-        triggeredAlarm.current = alarm.id;
-
-        SoundService.playAlarm();
-
-        navigation.navigate('AlarmScreen', {
-          alarmId: alarm.id,
-        });
-      }
+  // SoundService.playAlarm();
+  // navigation.navigate('AlarmScreen', {
+  //   alarmId: alarm.id,
+  // });
+}
 
     });
 

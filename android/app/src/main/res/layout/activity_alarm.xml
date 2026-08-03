@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Wake Up!"
+      android:text="NIKUNJ TEST 999"
         android:textSize="36sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
@@ -20,13 +20,13 @@
         android:id="@+id/btnSnooze"
         android:layout_width="220dp"
         android:layout_height="56dp"
-        android:text="Snooze"
+       android:text="MY SNOOZE"
         android:layout_marginBottom="20dp" />
 
     <Button
         android:id="@+id/btnStop"
         android:layout_width="220dp"
         android:layout_height="56dp"
-        android:text="Stop" />
+        android:text="MY STOP" />
 
 </LinearLayout>
