@@ -1,12 +1,11 @@
 package com.smartalarm
 
-import android.app.Notification
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.IBinder
-import androidx.core.app.NotificationCompat
 
 class AlarmService : Service() {
 
@@ -18,9 +17,7 @@ class AlarmService : Service() {
         startId: Int
     ): Int {
 
-        // STOP ALARM
         if (intent?.action == "STOP_ALARM") {
-
             mediaPlayer?.stop()
             mediaPlayer?.release()
             mediaPlayer = null
@@ -31,12 +28,25 @@ class AlarmService : Service() {
             return START_NOT_STICKY
         }
 
-        // OPEN ALARM SCREEN
-
-
-        // PLAY RINGTONE
         if (mediaPlayer == null) {
-            mediaPlayer = MediaPlayer.create(this, R.raw.alarm)
+
+            val ringtoneUri = intent?.getStringExtra("ringtoneUri")
+
+            mediaPlayer =
+                if (!ringtoneUri.isNullOrEmpty()) {
+                    MediaPlayer().apply {
+                        setDataSource(this@AlarmService, Uri.parse(ringtoneUri))
+                        setAudioAttributes(
+                            AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_ALARM)
+                                .build()
+                        )
+                        prepare()
+                    }
+                } else {
+                    MediaPlayer.create(this, R.raw.alarm)
+                }
+
             mediaPlayer?.isLooping = true
             mediaPlayer?.start()
         }

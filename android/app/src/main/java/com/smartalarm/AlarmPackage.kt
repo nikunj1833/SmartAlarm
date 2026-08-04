@@ -14,7 +14,8 @@ class AlarmPackage : ReactPackage {
 return listOf(
     AlarmSchedulerModule(reactContext),
     AlarmStorageModule(reactContext),
-    AlarmControlModule(reactContext)
+    AlarmControlModule(reactContext),
+    RingtoneModule(reactContext)
 )
     }
 

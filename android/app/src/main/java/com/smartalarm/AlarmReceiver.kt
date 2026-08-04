@@ -24,8 +24,12 @@ class AlarmReceiver : BroadcastReceiver() {
 
         context.startActivity(activityIntent)
 
-        // Start Alarm Service (Ringtone)
-        val serviceIntent = Intent(context, AlarmService::class.java)
+        // Start Alarm Service
+        val ringtoneUri = intent?.getStringExtra("ringtoneUri") ?: ""
+
+        val serviceIntent = Intent(context, AlarmService::class.java).apply {
+            putExtra("ringtoneUri", ringtoneUri)
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(serviceIntent)

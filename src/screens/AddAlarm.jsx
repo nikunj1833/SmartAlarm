@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
+  FlatList,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,13 +13,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { useAlarm } from '../context/AlarmContext';
 import { NativeModules } from 'react-native';
-const { AlarmScheduler } = NativeModules;
+const { AlarmScheduler, RingtoneModule } = NativeModules;
 const AddAlarm = ({ navigation }) => {
   const { addAlarm } = useAlarm();
   const [time, setTime] = useState(new Date());
   const [repeatDays, setRepeatDays] = useState([]);
-
   const [showPicker, setShowPicker] = useState(false);
+  const [ringtones, setRingtones] = useState([]);
+  const [selectedRingtone, setSelectedRingtone] = useState(null);
 
   const onTimeChange = (event, selectedTime) => {
     console.log('SELECTED TIME:', selectedTime);
@@ -46,8 +47,7 @@ const AddAlarm = ({ navigation }) => {
   };
 
   const saveAlarm = async () => {
-    const now = new Date();
-
+    RingtoneModule.stopPreview();
     const alarmTime = new Date();
 
     alarmTime.setHours(time.getHours());
@@ -60,24 +60,32 @@ const AddAlarm = ({ navigation }) => {
       time: alarmTime,
       enabled: true,
       repeat: repeatDays,
+      ringtone: selectedRingtone,
     };
 
     console.log('ALARM SET:', alarmTime);
 
-    addAlarm(newAlarm);
+  addAlarm(newAlarm);
 
-    AlarmScheduler.scheduleAlarm(alarmTime.getTime());
+AlarmScheduler.scheduleAlarm(
+  alarmTime.getTime(),
+  selectedRingtone?.uri || '',
+);
 
-    navigation.goBack();
+navigation.replace('Home');
   };
+  useEffect(() => {
+    RingtoneModule.getRingtones().then(data => {
+      setRingtones(data);
+    });
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* BACK BUTTON */}
-
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        nestedScrollEnabled={true}
+        contentContainerStyle={{ paddingBottom: 30 }}
       >
         <TouchableOpacity
           style={styles.backButton}
@@ -87,8 +95,6 @@ const AddAlarm = ({ navigation }) => {
         </TouchableOpacity>
 
         <Text style={styles.heading}>Create Alarm</Text>
-
-        {/* TIME PICKER */}
 
         <TouchableOpacity
           style={styles.timeCard}
@@ -110,8 +116,6 @@ const AddAlarm = ({ navigation }) => {
           />
         )}
 
-        {/* REPEAT DAYS */}
-
         <Text style={styles.sectionTitle}>Repeat</Text>
 
         <View style={styles.days}>
@@ -129,7 +133,30 @@ const AddAlarm = ({ navigation }) => {
           ))}
         </View>
 
-        {/* SAVE BUTTON */}
+        <Text style={styles.sectionTitle}>Alarm Ringtone</Text>
+
+        <View style={styles.ringtoneContainer}>
+          <FlatList
+            data={ringtones}
+            nestedScrollEnabled={true}
+            keyExtractor={item => item.uri}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.ringtoneItem,
+                  selectedRingtone?.uri === item.uri && styles.selectedRingtone,
+                ]}
+                onPress={() => {
+                  setSelectedRingtone(item);
+                  RingtoneModule.playRingtone(item.uri);
+                }}
+              >
+                <Text style={styles.ringtoneText}>{item.title}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
 
         <TouchableOpacity style={styles.saveButton} onPress={saveAlarm}>
           <Text style={styles.saveText}>Save Alarm</Text>
@@ -144,6 +171,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#080808',
     padding: 20,
+    paddingBottom: 30,
   },
 
   backButton: {
@@ -229,7 +257,8 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   saveButton: {
-    marginTop: 45,
+    marginTop: 20,
+    marginBottom: 20,
     backgroundColor: '#FF6B00',
     paddingVertical: 18,
     borderRadius: 20,
@@ -243,6 +272,27 @@ const styles = StyleSheet.create({
   activeDay: {
     backgroundColor: '#FF6B00',
     borderColor: '#FF6B00',
+  },
+  ringtoneItem: {
+    backgroundColor: '#181818',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 14,
+    marginTop: 8,
+  },
+
+  selectedRingtone: {
+    borderWidth: 2,
+    borderColor: '#FF6B00',
+  },
+
+  ringtoneText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  ringtoneContainer: {
+    height: 360,
+    marginTop: 15,
   },
 });
 export default AddAlarm;

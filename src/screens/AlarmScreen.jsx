@@ -15,227 +15,161 @@ import { NativeModules } from 'react-native';
 const { AlarmScheduler, AlarmControl } = NativeModules;
 
 const AlarmScreen = ({ navigation, route }) => {
+  const alarmTime = route?.params?.alarmTime || 'Wake Up';
+  const hour = route?.params?.alarmTime
+    ? new Date(route.params.alarmTime).getHours()
+    : new Date().getHours();
 
-  const alarmTime =
-    route?.params?.alarmTime || 'Wake Up';
+  let greeting = 'Good Night 🌙';
 
+  if (hour >= 4 && hour < 12) {
+    greeting = 'Good Morning 🌅';
+  } else if (hour >= 12 && hour < 17) {
+    greeting = 'Good Afternoon ☀️';
+  } else if (hour >= 17 && hour < 21) {
+    greeting = 'Good Evening 🌇';
+  }
 
   useEffect(() => {
-
     const backAction = () => {
       return true;
     };
 
-
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
-      backAction
+      backAction,
     );
 
-
     return () => backHandler.remove();
-
   }, []);
 
+  const stopAlarm = () => {
+    SoundService.stopAlarm();
 
-const stopAlarm = () => {
+    if (AlarmControl) {
+      AlarmControl.stopAlarm();
+    }
 
-  SoundService.stopAlarm();
+    navigation.replace('Home');
+  };
 
-  if (AlarmControl) {
-    AlarmControl.stopAlarm();
-  }
+  const snoozeAlarm = () => {
+    SoundService.stopAlarm();
 
-  navigation.replace('Home');
+    if (AlarmControl) {
+      AlarmControl.stopAlarm();
+    }
 
-};
+    const snoozeTime = Date.now() + 5 * 60 * 1000;
 
- const snoozeAlarm = () => {
+    if (AlarmScheduler) {
+      AlarmScheduler.scheduleAlarm(snoozeTime);
+    }
 
-  SoundService.stopAlarm();
-
-  if (AlarmControl) {
-    AlarmControl.stopAlarm();
-  }
-
-  const snoozeTime =
-    Date.now() + 5 * 60 * 1000;
-
-  if (AlarmScheduler) {
-    AlarmScheduler.scheduleAlarm(snoozeTime);
-  }
-
-  navigation.replace('Home');
-
-};
+    navigation.replace('Home');
+  };
 
   return (
-
     <SafeAreaView style={styles.container}>
-
-
       <View style={styles.top}>
+        <Text style={styles.icon}>⏰</Text>
 
-        <Text style={styles.icon}>
-          ⏰
-        </Text>
-
-
-        <Text style={styles.title}>
-          Alarm Ringing
-        </Text>
-
-
+        <Text style={styles.title}>Alarm Ringing</Text>
       </View>
-
-
 
       <View style={styles.center}>
+        <Text style={styles.time}>{alarmTime}</Text>
 
+        <Text style={styles.goodMorning}>{greeting}</Text>
 
-        <Text style={styles.time}>
-          {alarmTime}
-        </Text>
-
-
-        <Text style={styles.goodMorning}>
-          Good Morning 🌅
-        </Text>
-
-
-        <Text style={styles.subtitle}>
-          Your alarm is ringing...
-        </Text>
-
-
+        <Text style={styles.subtitle}>Your alarm is ringing...</Text>
       </View>
-
-
 
       <View style={styles.buttons}>
-
-
-        <TouchableOpacity
-          style={styles.snoozeButton}
-          onPress={snoozeAlarm}
-        >
-
-          <Text style={styles.buttonText}>
-            Snooze 5 min
-          </Text>
-
+        <TouchableOpacity style={styles.snoozeButton} onPress={snoozeAlarm}>
+          <Text style={styles.buttonText}>Snooze 5 min</Text>
         </TouchableOpacity>
 
-
-
-        <TouchableOpacity
-          style={styles.stopButton}
-          onPress={stopAlarm}
-        >
-
-          <Text style={styles.buttonText}>
-            STOP ALARM
-          </Text>
-
+        <TouchableOpacity style={styles.stopButton} onPress={stopAlarm}>
+          <Text style={styles.buttonText}>STOP ALARM</Text>
         </TouchableOpacity>
-
-
       </View>
-
-
     </SafeAreaView>
-
   );
 };
 
-
 export default AlarmScreen;
 
-
-
 const styles = StyleSheet.create({
-
-  container:{
-    flex:1,
-    backgroundColor:'#080808',
-    paddingHorizontal:25,
-    paddingTop:60,
-    paddingBottom:40,
+  container: {
+    flex: 1,
+    backgroundColor: '#080808',
+    paddingHorizontal: 25,
+    paddingTop: 60,
+    paddingBottom: 40,
   },
 
-
-  top:{
-    alignItems:'center',
+  top: {
+    alignItems: 'center',
   },
 
-
-  icon:{
-    fontSize:70,
+  icon: {
+    fontSize: 70,
   },
 
-
-  title:{
-    marginTop:20,
-    color:'#FF6B00',
-    fontSize:28,
-    fontWeight:'900',
+  title: {
+    marginTop: 20,
+    color: '#FF6B00',
+    fontSize: 28,
+    fontWeight: '900',
   },
 
-
-  center:{
-    flex:1,
-    justifyContent:'center',
-    alignItems:'center',
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
-
-  time:{
-    color:'#FFFFFF',
-    fontSize:58,
-    fontWeight:'900',
+  time: {
+    color: '#FFFFFF',
+    fontSize: 58,
+    fontWeight: '900',
   },
 
-
-  goodMorning:{
-    marginTop:25,
-    color:'#FFFFFF',
-    fontSize:26,
-    fontWeight:'800',
+  goodMorning: {
+    marginTop: 25,
+    color: '#FFFFFF',
+    fontSize: 26,
+    fontWeight: '800',
   },
 
-
-  subtitle:{
-    marginTop:12,
-    color:'#888',
-    fontSize:16,
+  subtitle: {
+    marginTop: 12,
+    color: '#888',
+    fontSize: 16,
   },
 
-
-  buttons:{
-    gap:15,
+  buttons: {
+    gap: 15,
   },
 
-
-  snoozeButton:{
-    backgroundColor:'#222',
-    padding:20,
-    borderRadius:22,
-    alignItems:'center',
+  snoozeButton: {
+    backgroundColor: '#222',
+    padding: 20,
+    borderRadius: 22,
+    alignItems: 'center',
   },
 
-
-  stopButton:{
-    backgroundColor:'#FF6B00',
-    padding:20,
-    borderRadius:22,
-    alignItems:'center',
+  stopButton: {
+    backgroundColor: '#FF6B00',
+    padding: 20,
+    borderRadius: 22,
+    alignItems: 'center',
   },
 
-
-  buttonText:{
-    color:'#FFFFFF',
-    fontSize:18,
-    fontWeight:'900',
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '900',
   },
-
 });
